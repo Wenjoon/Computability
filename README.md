@@ -1,1 +1,2 @@
 Hello! This is my new project. I am implementing a LRM in C to help me understand both C and URMs better. Adding documentation in the source file, hopefully its clear?
+This is a personal project based on what I am learning my Math 136 (incompleteness and undecidability) at UC berkeley. While the textbook is restricted (it is an early copy so distribution is prohibited, and I want to respect the wishes of the author until it is released), there are resources on learning computability theory out there on youtube, annas archive, etc.
