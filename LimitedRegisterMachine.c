@@ -16,13 +16,13 @@ typedef struct SequenceList {
         int size; 
 } Sequence; 
 
-void SequenceInit(Sequence* L) { 
+void SeqInit(Sequence* L) { 
     L->size = 1; 
     L->used = 0; 
     L->entries = malloc(sizeof(unsigned int)); 
 } 
 
-void SequenceAdd(Sequence* L, unsigned int a) { 
+void SeqAdd(Sequence* L, unsigned int a) { 
     if (L->used == L->size) { 
         L->size *= 2; 
         L->entries = realloc(L->entries, sizeof(unsigned int) * L->size); 
@@ -31,15 +31,15 @@ void SequenceAdd(Sequence* L, unsigned int a) {
     L->used += 1; 
 } 
 
-void SequenceArrayAdd(Sequence* L, unsigned int a[], unsigned int size) {
+void SeqArrayAdd(Sequence* L, unsigned int a[], unsigned int size) {
     for (int i = 0; i < size; i += 1) {
-        SequenceAdd(L, a[i]);
+        SeqAdd(L, a[i]);
     }
 }
 
 #define SeqMake(name)\
     Sequence name;\
-    SequenceInit(&name);\
+    SeqInit(&name);\
 
 //Implementing helper functions to build up to a universal function, F(m, n): N^2 -> N, m, n in N using codes. 
 //For now it is mostly an exercise as the 32 bit integer limit is reached quickly via encoding sequences being a lot of high prime powers.
@@ -114,9 +114,9 @@ typedef struct UnlimitedRegisterMachine {
 //I am considering a dictionary-structure to avoid adding these extra registers that are all zeroes, but assuming programs try and use registers efficiently, this structure should suffice
 
 void URMRegBound(URM machine, unsigned int n) {
-    if (n > machine.R->used){
+    if (n >= machine.R->used){
         for (int i = machine.R->used; machine.R->used < n; i += 1) {
-            SequenceAdd(machine.R, 0);
+            SeqAdd(machine.R, 0);
         }
     }
 }
@@ -125,35 +125,35 @@ void URMRegBound(URM machine, unsigned int n) {
 //In reality, the instruction sequence would contain instruction "chunks" of differing length. However, as that is not the focus, it is on hold.
 //machine is of type lrm
 
-void Zeroer(URM machine, unsigned int (*n)[3]) {
-    URMRegBound(machine, *n[0]);
-    machine.R->entries[*n[0]] = 0;
+void Zeroer(URM machine, unsigned int (n)[3]) {
+    URMRegBound(machine, n[0]);
+    machine.R->entries[n[0]] = 0;
     machine.Ci += 1;
 }
 
-void Successor(URM machine, unsigned int (*n)[3]) {
-    URMRegBound(machine, *n[0]);
-    machine.R->entries[*n[0]] += 1;
+void Successor(URM machine, unsigned int (n)[3]) {
+    URMRegBound(machine, n[0]);
+    machine.R->entries[n[0]] += 1;
     machine.Ci += 1;
 }
 
-void Transfer(URM machine, unsigned int (*n)[3]) {
-    URMRegBound(machine, *n[0]);
-    URMRegBound(machine, *n[1]);
-    machine.R->entries[*n[0]] = machine.R->entries[*n[1]];
+void Transfer(URM machine, unsigned int (n)[3]) {
+    URMRegBound(machine, n[0]);
+    URMRegBound(machine, n[1]);
+    machine.R->entries[n[0]] = machine.R->entries[n[1]];
     machine.Ci += 1;
 }
 
-void Jumper(URM machine, unsigned int (*n)[3]) {
-    URMRegBound(machine, *n[0]);
-    URMRegBound(machine, *n[1]);
-    if (machine.R->entries[*n[1]] == machine.R->entries[*n[0]]) {
-        machine.Ci = *n[2];
+void Jumper(URM machine, unsigned int (n)[3]) {
+    URMRegBound(machine, n[0]);
+    URMRegBound(machine, n[1]);
+    if (machine.R->entries[n[1]] == machine.R->entries[n[0]]) {
+        machine.Ci = n[2];
     }
     else {machine.Ci += 1;}
 }
 
-void (*funk[4])(URM, unsigned int (*)[3]) = {Zeroer, Successor, Transfer, Jumper};
+void (*funk[4])(URM, unsigned int[3]) = {Zeroer, Successor, Transfer, Jumper};
 
 unsigned int pholder[4];
 
@@ -192,12 +192,27 @@ unsigned int URMRun(URM machine) {
         inputs[1] = machine.I->entries[ciIndex + 2];
         inputs[2] = machine.I->entries[ciIndex + 3];
     
-        funk[machine.I->entries[ciIndex] - 1](machine, &inputs);
+        funk[machine.I->entries[ciIndex] - 1](machine, inputs);
         PrintSeq(machine.R);
         return URMRun(machine);
     }
 }
 
 void main() {
-
+    SeqMake(TestRegi);
+    SeqMake(TestInst);
+    unsigned int R[] = {
+        0, 0
+    };
+    unsigned int I[] = {
+        2, 0, 0, 0,
+        3, 0, 1, 0,
+        4, 0, 1, 5
+    };
+    SeqArrayAdd(&TestRegi, R, 2);
+    SeqArrayAdd(&TestInst, I, 3 * 4);
+    PrintSeq(&TestInst);
+    PrintSeq(&TestRegi);
+    URM TestUrm = {&TestRegi, &TestInst, 0};
+    URMRun(TestUrm);
 }
