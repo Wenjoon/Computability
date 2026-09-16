@@ -109,6 +109,7 @@ typedef struct UnlimitedRegisterMachine {
 } URM;
 
 unsigned int start = 0;
+
 //What is regbound? In order to model a URM without unlimited memory, we must make a few concessions. 
 //In this case, lest a register be specified, it will be assumed to be 0. 
 //If we want to operate on such a register but it is out of our sequence's bounds, we can add it and and all fill in all registers before it
@@ -161,6 +162,7 @@ unsigned int pholder[4];
 //These macros automatically add instructions to the instruction sequence!
 //I will leave a a section down in the main function such that you may try programming a URM!
 //Note that "machine" is of time URM, and pholder will only store the last instruction added (it is a place-holder, thus pholder)
+
 #define Z(n, machine)\
     pholder = {1, n, 0, 0};\
     SequenceArrayAdd(machine.I, pholder, 4);\
@@ -180,15 +182,11 @@ unsigned int pholder[4];
 //Now, how to run this URM? Recursively! Because the behavior of a given instruction on a specific sequence of registers is determined, 
 //we can think of a specific register "input", the same instructions, and a "current instruction" (as denoted by ci) as all the information we need to determine a specific state of the URM
 //A urm whose ci is beyond the index of the last instruction "halts" (as there is nothing left to do), and so the program returns the number in register 0
+
 unsigned int ciIndex;
 unsigned int inputs[3];
 
-unsigned int URMRun(URM machine) {
-    if (*machine.Ci > (machine.I->used / 4) - 1) {
-        printf("Current Instruction: %i\n", *machine.Ci);
-        printf("Output: %u \n", machine.R->entries[0]);
-        return machine.R->entries[0];
-    }
+void URMRunHelper(URM machine) {
     ciIndex = *machine.Ci * 4;
     inputs[0] = machine.I->entries[ciIndex + 1];
     inputs[1] = machine.I->entries[ciIndex + 2];
@@ -197,7 +195,15 @@ unsigned int URMRun(URM machine) {
     printf("Current Instruction is: %i\n", *machine.Ci);
     funk[machine.I->entries[ciIndex] - 1](machine, inputs);
     PrintSeq(machine.R);
-    return URMRun(machine);
+}
+
+unsigned int URMRun(URM machine) {
+    while (*machine.Ci <= (machine.I->used / 4) - 1) {
+        URMRunHelper(machine);
+    }
+    printf("Current Instruction: %i\n", *machine.Ci);
+    printf("Output: %u \n", machine.R->entries[0]);
+    return machine.R->entries[0];
 }
 
 //Here we run the code. 
@@ -209,7 +215,7 @@ void main() {
     //Registers for the example URM. You can edit the first 2, they will be the numbers you are adding together
     //you can also try increasing the 3rd (index 2) to get a better understanding of what the program is doing
     unsigned int R[] = {
-        12, 15, 0
+        12, 10875, 0
     };
     //Example of addition: Increments R0 and R2 until R2 = R1, then returns R0 to return A+B
     unsigned int I[] = {
@@ -218,6 +224,7 @@ void main() {
         4, 1, 2, 4,
         4, 0, 0, 0
     };
+
     SeqArrayAdd(&Regi, R, sizeof(R) / sizeof(unsigned int));
     SeqArrayAdd(&Inst, I, sizeof(I) / sizeof(unsigned int));
     
