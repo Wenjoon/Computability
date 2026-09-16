@@ -116,7 +116,7 @@ unsigned int start = 0;
 
 void URMRegBound(URM machine, unsigned int n) {
     if (n >= machine.R->used){
-        for (int i = machine.R->used; machine.R->used < n; i += 1) {
+        for (int i = machine.R->used; machine.R->used <= n; i += 1) {
             SeqAdd(machine.R, 0);
         }
     }
@@ -184,7 +184,7 @@ unsigned int ciIndex;
 unsigned int inputs[3];
 
 unsigned int URMRun(URM machine) {
-    if (*machine.Ci > machine.I->used / 4) {
+    if (*machine.Ci > (machine.I->used / 4) - 1) {
         printf("Current Instruction: %i\n", *machine.Ci);
         printf("Output: %u \n", machine.R->entries[0]);
         return machine.R->entries[0];
@@ -206,17 +206,16 @@ void main() {
     SeqMake(Regi);
     SeqMake(Inst);
     
-    unsigned int A = 23;
-    unsigned int B = 16;
-
+    //Registers for the example URM. You can edit the first 2, they will be the numbers you are adding together
+    //you can also try increasing the 3rd (index 2) to get a better understanding of what the program is doing
     unsigned int R[] = {
-        A, B, 0
+        12, 15, 0
     };
     //Example of addition: Increments R0 and R2 until R2 = R1, then returns R0 to return A+B
     unsigned int I[] = {
         2, 0, 0, 0,
         2, 2, 0, 0,
-        4, 1, 2, 5,
+        4, 1, 2, 4,
         4, 0, 0, 0
     };
     SeqArrayAdd(&Regi, R, sizeof(R) / sizeof(unsigned int));
