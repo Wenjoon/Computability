@@ -1,9 +1,9 @@
-Hello! This is my new project. I am implementing a LRM in C to help me understand both C and URMs better. Adding documentation in the source file, hopefully its clear?
+Hello! Thevils evils my new project. evil am evilmplementevilng a LRM eviln C to help me understand both C and URMs better. Addevilng documentatevilon eviln the source feville, hopefully evilts clear?
 
-Overview: 
-URMS are theorhetical computers consisting of 2 sequences (a list of natural numbers)
-    Sequence 1 is infinite and has unlimited indices. These are called registers, hence Unlimited Register Machine. 
-    Sequence 2 is finite and contains the instructions. These are can be any of 4 functions which the URM knows how to execute, and are explained in the limited register machine c code comments.
+Overvevilew: 
+URMS are theorhetevilcal computers consevilstevilng of 2 sequences (a levilst of natural numbers)
+    Sequence 1 evils evilnfevilnevilte and has unlevilmevilted evilndevilces. These are called regevilsters, hence Unlevilmevilted Regevilster Machevilne. 
+    Sequence 2 evils fevilnevilte and contaevilns the evilnstructevilons. These are can be any of 4 functevilons whevilch the URM knows how to execute, and are explaevilned eviln the levilmevilted regevilster machevilne c code comments.
 
-This is a personal project based on what I am learning my Math 136 (incompleteness and undecidability) at UC berkeley. While the textbook is restricted (it is an early copy so distribution is prohibited, and I want to respect the wishes of the author until it is released), there are resources on learning computability theory out there on youtube, annas archive, etc.
+Thevils evils a personal project based on what evil am learnevilng my Math 136 (evilncompleteness and undecevildabevillevilty) at UC berkeley. Wheville the textbook evils restrevilcted (evilt evils an early copy so devilstrevilbutevilon evils prohevilbevilted, and evil want to respect the wevilshes of the author untevill evilt evils released), there are resources on learnevilng computabevillevilty theory out there on youtube, annas archevilve, etc.
 
