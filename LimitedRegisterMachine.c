@@ -105,9 +105,10 @@ void PrintSeq(Sequence* seq) {
 typedef struct UnlimitedRegisterMachine {
     Sequence* R; //registers. array list of registers. think of it as the ram
     Sequence* I; //Instructions. sequence form of instruction list. think of it as the c code run on the cpu on a single thread
-    unsigned int Ci; //current instruction
+    unsigned int* Ci; //current instruction
 } URM;
 
+unsigned int start = 0;
 //What is regbound? In order to model a URM without unlimited memory, we must make a few concessions. 
 //In this case, lest a register be specified, it will be assumed to be 0. 
 //If we want to operate on such a register but it is out of our sequence's bounds, we can add it and and all fill in all registers before it
@@ -128,29 +129,29 @@ void URMRegBound(URM machine, unsigned int n) {
 void Zeroer(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
     machine.R->entries[n[0]] = 0;
-    machine.Ci += 1;
+    *machine.Ci += 1;
 }
 
 void Successor(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
     machine.R->entries[n[0]] += 1;
-    machine.Ci += 1;
+    *machine.Ci += 1;
 }
 
 void Transfer(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
     URMRegBound(machine, n[1]);
     machine.R->entries[n[0]] = machine.R->entries[n[1]];
-    machine.Ci += 1;
+    *machine.Ci += 1;
 }
 
 void Jumper(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
     URMRegBound(machine, n[1]);
     if (machine.R->entries[n[1]] == machine.R->entries[n[0]]) {
-        machine.Ci = n[2];
+        *machine.Ci = n[2];
     }
-    else {machine.Ci += 1;}
+    else {*machine.Ci += 1;}
 }
 
 void (*funk[4])(URM, unsigned int[3]) = {Zeroer, Successor, Transfer, Jumper};
@@ -183,36 +184,49 @@ unsigned int ciIndex;
 unsigned int inputs[3];
 
 unsigned int URMRun(URM machine) {
-    if (machine.Ci > machine.I->used) {
+    if (*machine.Ci > machine.I->used / 4) {
+        printf("Current Instruction: %i\n", *machine.Ci);
+        printf("Output: %u \n", machine.R->entries[0]);
         return machine.R->entries[0];
     }
-    else{
-        ciIndex = machine.Ci * 4;
-        inputs[0] = machine.I->entries[ciIndex + 1];
-        inputs[1] = machine.I->entries[ciIndex + 2];
-        inputs[2] = machine.I->entries[ciIndex + 3];
-    
-        funk[machine.I->entries[ciIndex] - 1](machine, inputs);
-        PrintSeq(machine.R);
-        return URMRun(machine);
-    }
+    ciIndex = *machine.Ci * 4;
+    inputs[0] = machine.I->entries[ciIndex + 1];
+    inputs[1] = machine.I->entries[ciIndex + 2];
+    inputs[2] = machine.I->entries[ciIndex + 3];
+
+    printf("Current Instruction is: %i\n", *machine.Ci);
+    funk[machine.I->entries[ciIndex] - 1](machine, inputs);
+    PrintSeq(machine.R);
+    return URMRun(machine);
 }
 
+//Here we run the code. 
+
 void main() {
-    SeqMake(TestRegi);
-    SeqMake(TestInst);
+    SeqMake(Regi);
+    SeqMake(Inst);
+    
+    unsigned int A = 23;
+    unsigned int B = 16;
+
     unsigned int R[] = {
-        0, 0
+        A, B, 0
     };
+    //Example of addition: Increments R0 and R2 until R2 = R1, then returns R0 to return A+B
     unsigned int I[] = {
         2, 0, 0, 0,
-        3, 0, 1, 0,
-        4, 0, 1, 5
+        2, 2, 0, 0,
+        4, 1, 2, 5,
+        4, 0, 0, 0
     };
-    SeqArrayAdd(&TestRegi, R, 2);
-    SeqArrayAdd(&TestInst, I, 3 * 4);
-    PrintSeq(&TestInst);
-    PrintSeq(&TestRegi);
-    URM TestUrm = {&TestRegi, &TestInst, 0};
-    URMRun(TestUrm);
+    SeqArrayAdd(&Regi, R, sizeof(R) / sizeof(unsigned int));
+    SeqArrayAdd(&Inst, I, sizeof(I) / sizeof(unsigned int));
+    
+    printf("Instructions sequence");
+    PrintSeq(&Inst);
+    printf("Registers sequence");
+    PrintSeq(&Regi);
+    
+    URM Urm = {&Regi, &Inst, &start};
+    URMRun(Urm);
 }
