@@ -142,7 +142,7 @@ void Successor(URM machine, unsigned int (n)[3]) {
 void Transfer(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
     URMRegBound(machine, n[1]);
-    machine.R->entries[n[0]] = machine.R->entries[n[1]];
+    machine.R->entries[n[1]] = machine.R->entries[n[0]];
     *machine.Ci += 1;
 }
 
@@ -215,14 +215,34 @@ void main() {
     //Registers for the example URM. You can edit the first 2, they will be the numbers you are adding together
     //you can also try increasing the 3rd (index 2) to get a better understanding of what the program is doing
     unsigned int R[] = {
-        12, 10875, 0
+        127, 256
     };
     //Example of addition: Increments R0 and R2 until R2 = R1, then returns R0 to return A+B
+    /*
     unsigned int I[] = {
         2, 0, 0, 0,
         2, 2, 0, 0,
         4, 1, 2, 4,
         4, 0, 0, 0
+    };
+    */
+    //Example of difference between R0 and R1 calculator
+    unsigned int I[] = {
+        //makes a copy of element A at R3, and B at R4
+        3, 0, 3, 0,
+        3, 1, 4, 0,
+        //if R3 = B or R4 = A, skips to end condition
+        4, 1, 3, 8,
+        4, 0, 4, 8,
+        //increments the copies and R2 (starts at 0) until R3 = R1 or R4 = R0
+        //R2 will store the number of increments, ie their difference
+        2, 2, 0, 0,
+        2, 3, 0, 0,
+        2, 4, 0, 0,
+        //recursive step 
+        4, 0, 0, 2,
+        //end condition
+        3, 2, 0, 0
     };
 
     SeqArrayAdd(&Regi, R, sizeof(R) / sizeof(unsigned int));
