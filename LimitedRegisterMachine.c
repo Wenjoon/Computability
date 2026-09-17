@@ -93,14 +93,16 @@ void PrintSeq(Sequence* seq) {
     printf("]\n");
 }
 
-//Reconsidering removing limited register machine struct as the machine is more of a process but idk.
-//anywho, URMRun takes in a sequence of instructions and recursively iterates through them until it halts, then returns whatevers at index 0 of the register.
-//There are 4 basic functions:
-//      1. zero instruction: Z(n) tells the machine to change R_n (register n, ie index n of the registers) to a 0
-//      2. successor instruction: S(n) tells the machine to increment R_n by 1
-//      3. transfer instruction: T(m, n) tells the machine to change R_n to the entry at R_m
-//      4. jump instruction: J(m, n, q) tells the machine to move to R_q if R_m = R_n, otherwise to increment the current instruction by 1
-//Given these numberings, when making a sequence of these instructions, Z(n) -> <1, n>, T(m, n) -> <3, m, n>, etc.
+/*
+Reconsidering removing limited register machine struct as the machine is more of a process but idk.
+anywho, URMRun takes in a sequence of instructions and recursively iterates through them until it halts, then returns whatevers at index 0 of the register.
+There are 4 basic functions:
+    1. zero instruction: Z(n) tells the machine to change R_n (register n, ie index n of the registers) to a 0
+    2. successor instruction: S(n) tells the machine to increment R_n by 1
+    3. transfer instruction: T(m, n) tells the machine to change R_n to the entry at R_m
+    4. jump instruction: J(m, n, q) tells the machine to move to R_q if R_m = R_n, otherwise to increment the current instruction by 1
+Given these numberings, when making a sequence of these instructions, Z(n) -> <1, n>, T(m, n) -> <3, m, n>, etc.
+*/
 
 typedef struct UnlimitedRegisterMachine {
     Sequence* R; //registers. array list of registers. think of it as the ram
@@ -110,10 +112,12 @@ typedef struct UnlimitedRegisterMachine {
 
 unsigned int start = 0;
 
-//What is regbound? In order to model a URM without unlimited memory, we must make a few concessions. 
-//In this case, lest a register be specified, it will be assumed to be 0. 
-//If we want to operate on such a register but it is out of our sequence's bounds, we can add it and and all fill in all registers before it
-//I am considering a dictionary-structure to avoid adding these extra registers that are all zeroes, but assuming programs try and use registers efficiently, this structure should suffice
+/*
+What is regbound? In order to model a URM without unlimited memory, we must make a few concessions. 
+In this case, lest a register be specified, it will be assumed to be 0. 
+If we want to operate on such a register but it is out of our sequence's bounds, we can add it and and all fill in all registers before it
+I am considering a dictionary-structure to avoid adding these extra registers that are all zeroes, but assuming programs try and use registers efficiently, this structure should suffice
+*/
 
 void URMRegBound(URM machine, unsigned int n) {
     if (n >= machine.R->used){
@@ -123,9 +127,11 @@ void URMRegBound(URM machine, unsigned int n) {
     }
 }
 
-//In order to iterate through in an uncomplicated fashion, we will append chunks of 4 numbers for each instruction (as the larges instruction, jumps, take in 3 inputs),
-//In reality, the instruction sequence would contain instruction "chunks" of differing length. However, as that is not the focus, it is on hold.
-//machine is of type lrm
+/*
+In order to iterate through in an uncomplicated fashion, we will append chunks of 4 numbers for each instruction (as the larges instruction, jumps, take in 3 inputs),
+In reality, the instruction sequence would contain instruction "chunks" of differing length. However, as that is not the focus, it is on hold.
+machine is of type lrm
+*/
 
 void Zeroer(URM machine, unsigned int (n)[3]) {
     URMRegBound(machine, n[0]);
@@ -159,9 +165,11 @@ void (*funk[4])(URM, unsigned int[3]) = {Zeroer, Successor, Transfer, Jumper};
 
 unsigned int pholder[4];
 
-//These macros automatically add instructions to the instruction sequence!
-//I will leave a a section down in the main function such that you may try programming a URM!
-//Note that "machine" is of time URM, and pholder will only store the last instruction added (it is a place-holder, thus pholder)
+/*
+These macros automatically add instructions to the instruction sequence!
+I will leave a a section down in the main function such that you may try programming a URM!
+Note that "machine" is of time URM, and pholder will only store the last instruction added (it is a place-holder, thus pholder)
+*/
 
 #define Z(n, machine)\
     pholder = {1, n, 0, 0};\
@@ -215,18 +223,23 @@ void main() {
     //Registers for the example URM. You can edit the first 2, they will be the numbers you are adding together
     //you can also try increasing the 3rd (index 2) to get a better understanding of what the program is doing
     unsigned int R[] = {
-        127, 256
+        81, 81
     };
+    //Here I will write a few sample programs from N^2->N operating on the above register, {A, B, ...}
     //Example of addition: Increments R0 and R2 until R2 = R1, then returns R0 to return A+B
     /*
     unsigned int I[] = {
+        //increments A and R2 by 1
         2, 0, 0, 0,
         2, 2, 0, 0,
+        //when R2 = B, it will have been incremented as many times as A, and thus R0 = A+B
         4, 1, 2, 4,
+        //If not, this jumper sends us back to I0 and we iterate once more
         4, 0, 0, 0
     };
     */
     //Example of difference between R0 and R1 calculator
+    /*
     unsigned int I[] = {
         //makes a copy of element A at R3, and B at R4
         3, 0, 3, 0,
@@ -243,6 +256,20 @@ void main() {
         4, 0, 0, 2,
         //end condition
         3, 2, 0, 0
+    };
+    */
+    //Example of a multiplication function, it will be nested addition
+    unsigned int I[] = {
+        3, 0, 2, 0,
+        2, 4, 0, 0,
+        2, 0, 0, 0,
+        2, 3, 0, 0,
+        4, 2, 3, 6,
+        4, 0, 0, 2,
+        2, 4, 0, 0,
+        4, 4, 1, 10,
+        1, 3, 0, 0,
+        4, 0, 0, 2
     };
 
     SeqArrayAdd(&Regi, R, sizeof(R) / sizeof(unsigned int));
